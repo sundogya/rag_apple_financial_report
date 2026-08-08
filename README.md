@@ -58,3 +58,15 @@ An enterprise-ready, production-grade **Advanced RAG (Retrieval-Augmented Genera
 * remove index page (manual)
 
 ---
+
+## Prompt to convert pdf to .md file
+
+* Gemini
+* Claude
+```
+你是一位专业的金融数据解析助手。请阅读我提供的pdf，将其中的内容转化为干净的 Markdown 文件：
+    【核心要求】：
+    1. 重点识别其中的所有表格,并且保留表格的描述信息。如果表格跨页，请自动拼接为一个完整连续的 Markdown 表格，绝对不要截断。
+    2. 自动过滤掉重复的页眉、页脚（如 Apple Inc. | 2025 Form 10-K）和页码。
+    3. 确保所有数据列精准对齐。直接输出 Markdown文件，不要写任何开场白或解释文字。
+```
