@@ -37,7 +37,7 @@ def chunk_markdown_file_new(
     file_path: str,
     chunk_size: int = 1200,
     chunk_overlap: int = 150,
-    max_table_rows: int = 10
+    max_table_rows: int = 12
 ) -> list[Document]:
     
     if not os.path.exists(file_path):
@@ -50,6 +50,7 @@ def chunk_markdown_file_new(
     headers_to_split_on = [
         ("#", "Part"),
         ("##", "Item"),
+        ("###", "Section")
     ]
     markdown_splitter = MarkdownHeaderTextSplitter(
         headers_to_split_on=headers_to_split_on,
@@ -92,7 +93,6 @@ def chunk_markdown_file_new(
 
         for match in matches:
             start, end = match.span()
-            
             # 兼容有标签和无标签两种匹配情况
             table_id = match.group(1) if match.group(1) else "tbl_auto"
             raw_table_content = match.group(2) if match.group(2) is not None else match.group(3)
@@ -112,7 +112,6 @@ def chunk_markdown_file_new(
 
             # B. 处理表格内容（智能识别表头与分隔线）
             table_lines = [l.strip() for l in raw_table_content.split("\n") if l.strip()]
-
             if len(table_lines) >= 2 and "|" in table_lines[0]:
                 # 🛡️ 修复原因 1：检查第二行是否确实是 |---| 分隔线
                 has_divider = "---" in table_lines[1] or ":---" in table_lines[1]
@@ -136,15 +135,16 @@ def chunk_markdown_file_new(
                     for i in range(0, total_rows, max_table_rows):
                         sub_data = data_lines[i : i + max_table_rows]
                         chunk_text = "\n".join(header_lines + sub_data)
-                        
+                        metadata = {
+                            **base_metadata,
+                            "type": "table",
+                            "table_id": table_id,
+                            "row_range": f"{i + 1}-{min(i + max_table_rows, total_rows)}"
+                        }
+                        # print(f"📦 切分表格 {table_id}， 行范围: {metadata['row_range']}, section: {base_metadata.get('Section', '')}")
                         final_chunks.append(Document(
                             page_content=chunk_text,
-                            metadata={
-                                **base_metadata,
-                                "type": "table",
-                                "table_id": table_id,
-                                "row_range": f"{i + 1}-{min(i + max_table_rows, total_rows)}"
-                            }
+                            metadata=metadata
                         ))
             else:
                 sub_docs = text_splitter.create_documents(
@@ -152,7 +152,6 @@ def chunk_markdown_file_new(
                     metadatas=[{**base_metadata, "type": "text"}]
                 )
                 final_chunks.extend(sub_docs)
-
             last_idx = end
 
         # C. 处理尾部剩余文本

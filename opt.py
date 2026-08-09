@@ -1,8 +1,9 @@
 # import src.parser
 # import test.fileCheck
 # import test.chunkCheck
+import test.vectorCheck
 # import src.clearData
-import src.chunker
+# import src.chunker
 # import src.rag_chat
 
 # src.parser.convert_pdf_to_markdown("data/10k.pdf", "data/apple_10k_2025_pdfplumber.md")
@@ -16,5 +17,7 @@ import src.chunker
 # src.clearData.add_table_tags_to_file("data/apple_10k_2025_claude.md", "data/apple_10k_2025_claude_with_table_tags.md")
 # src.chunker.chunk_markdown_file("data/apple_10k_2025_unstructured.md")
 # src.chunker.save_chunks_as_vector_store("data/apple_10k_2025_unstructured.md", "./data/chroma_db_ollama")
-src.chunker.save_chunks_as_vector_store("data/apple_10k_2025_claude_with_table_tags.md", "./data/chroma_db_ollama")
+# src.chunker.save_chunks_as_vector_store("data/apple_10k_2025_claude_with_table_tags.md", "./data/chroma_db_ollama")
 # test.chunkCheck.check_chunk_health("data/apple_10k_2025_unstructured.md")
+# test.chunkCheck.check_chunk_missed("data/apple_10k_2025_claude_with_table_tags.md")
+test.vectorCheck.check_save_vector("./data/chroma_db_ollama")

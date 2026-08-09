@@ -57,10 +57,13 @@ Question:
 {question}
 
 Requirements:
-1. Base your answer strictly on the provided context. Cite sources (e.g. Part I -> Item 1A) where applicable.
-2. If the answer cannot be found in the context, explicitly state "Based on the provided sections, I cannot answer this question."
+1. Strict Context Alignment: Base your answer 100% strictly on the provided context. Do NOT use external knowledge, prior assumptions, or logical extrapolation.
+2. Handling Tables & Structured Data: When extracting numbers or facts from tables, carefully align row items with their corresponding column headers to ensure accurate mapping.
+3. Citations: Cite the section name, item title, or heading from the context where applicable. If no specific title is present in the context, state the facts directly without inventing titles.
+4. Refusal Protocol: If the context does not contain enough explicit information to answer the question, state exactly: "Based on the provided sections, I cannot answer this question."
 
-Answer:""")
+Answer:
+""")
 
     rag_chain = (
         {"context": retriever | format_docs, "question": RunnablePassthrough()}
@@ -98,7 +101,7 @@ if prompt_input := st.chat_input("输入关于苹果财报的问题 (如: What a
     with st.chat_message("assistant"):
         # 先检索文档，提取出处的元数据
         retrieved_docs = retriever.invoke(prompt_input)
-        sources = [f"{doc.metadata.get('Part', 'N/A')} -> {doc.metadata.get('Item', 'N/A')}" for doc in retrieved_docs]
+        sources = [f"{doc.metadata.get('Part', 'N/A')} -> {doc.metadata.get('Item', 'N/A')} -> {doc.metadata.get('Section', 'N/A')}" for doc in retrieved_docs]
 
         # 定义生成器，把 LLM 吐出来的 Chunk 传递给 Streamlit
         def generate_response():
