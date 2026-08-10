@@ -56,13 +56,16 @@ An enterprise-ready, production-grade **Advanced RAG (Retrieval-Augmented Genera
 ## Clear data
 
 * remove index page (manual)
+* add table tag to md file (to optimize chunks of table content)
 
 ---
 
 ## Prompt to convert pdf to .md file
 
-* Gemini
-* Claude
+* pdfplumber (Not convert all Table conent)
+* Unstructured (Table content problem)
+* Gemini(Not all Content)
+* Claude(Ok)
 ```
 你是一位专业的金融数据解析助手。请阅读我提供的pdf，将其中的内容转化为干净的 Markdown 文件：
     【核心要求】：
