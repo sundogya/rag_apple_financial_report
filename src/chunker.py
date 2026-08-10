@@ -37,7 +37,7 @@ def chunk_markdown_file_new(
     file_path: str,
     chunk_size: int = 1200,
     chunk_overlap: int = 150,
-    max_table_rows: int = 12
+    max_table_rows: int = 5
 ) -> list[Document]:
     
     if not os.path.exists(file_path):
