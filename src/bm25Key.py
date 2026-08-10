@@ -92,8 +92,8 @@ def hybrid_retrieval_with_rerank_test(file_path,persist_dir="./data/chroma_db_ol
         persist_directory=persist_dir, 
         embedding_function=embeddings,
     )
-    chroma_retriever = vector_store.as_retriever(search_kwargs={"k": 40})
-    bm25_retriever = BM25Retriever.from_documents(docs, k=40)
+    chroma_retriever = vector_store.as_retriever(search_kwargs={"k": 5})
+    bm25_retriever = BM25Retriever.from_documents(docs, k=5)
 
     hybrid_retriever = EnsembleRetriever(
         retrievers=[chroma_retriever, bm25_retriever],

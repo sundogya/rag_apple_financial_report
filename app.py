@@ -12,7 +12,7 @@ from langchain_ollama import OllamaEmbeddings, ChatOllama
 from langchain_chroma import Chroma
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 from langchain.retrievers.document_compressors import CrossEncoderReranker
 
@@ -21,7 +21,7 @@ st.set_page_config(page_title="Apple 财报 AI 助手", page_icon="🍎", layout
 st.title("🍎 Apple 10-K 财报 AI 智能分析系统")
 st.caption("基于 Ollama (Llama 3.1 8B + Nomic Embed) & ChromaDB 本地私有化 RAG 架构")
 
-# 3. 初始化服务（使用 @st.cache_resource 确保加载后的对象驻留内存，防止每次点击都重新加载）
+# 3. 初始化服务
 @st.cache_resource
 def load_rag_chain(
     persist_dir="./data/chroma_db_ollama",
@@ -50,21 +50,26 @@ def load_rag_chain(
         base_compressor=compressor, 
         base_retriever=hybrid_retriever
     )
+    
+    # 💡 修复 1：将 num_ctx 扩大到 8192，防止 Top 5 截断！
     llm = ChatOllama(
         model=llm_model,
         temperature=0.0,
         base_url="http://127.0.0.1:11434",
-        num_ctx=2048
+        num_ctx=8192
     )
+
+    # 💡 修复 2：在 format_docs 中增加 [Chunk X] 编号，与 Prompt 的引用对齐！
     def format_docs(docs):
         formatted = []
-        for doc in docs:
+        for i, doc in enumerate(docs):
             part = doc.metadata.get("Part", "N/A")
             item = doc.metadata.get("Item", "N/A")
             section = doc.metadata.get("Section", "N/A")
-            formatted.append(f"【Source: {part} -> {item} -> {section}】\n{doc.page_content}")
-        return "\n\n" + "=" * 40 + "\n\n".join(formatted)
+            formatted.append(f"--- [Chunk {i+1}] (Source: {part} -> {item} -> {section}) ---\n{doc.page_content}")
+        return "\n\n".join(formatted)
 
+    # 💡 修复 3：补全了 【User Query】 缺失的右括号 】
     prompt = ChatPromptTemplate.from_template("""You are a senior financial analyst assistant. Answer the user's question accurately, completely, and STRICTLY based on the provided [Reference Context].
 
 【CRITICAL FINANCIAL CONSTRAINTS】:
@@ -76,22 +81,24 @@ def load_rag_chain(
    - Present multi-year numerical metrics using a clean Markdown table format:
      | Category / Line Item | 2025 | 2024 | 2023 |
    - Preserve units of measure (e.g., "$ in millions") exactly as reported in the context.
-4. 📌 IN-TEXT CITATIONS:
-   - Append source citations using [Chunk X] at the end of key figures or tables to indicate where the data originated (e.g., "$12,345 million [Chunk 2]").
-5. 🛡️ STRICT GROUNDING & NO HALLUCINATION:
+4. 🛡️ STRICT GROUNDING & NO HALLUCINATION:
    - Rely EXCLUSIVELY on the provided context. Do not calculate, extrapolate, or infer missing figures using external knowledge.
    - If the context lacks sufficient information, state clearly: "The provided context does not contain sufficient details to answer this question."
 
 【Reference Context】:
 {context}
 
-【User Query:
+【User Query】:
 {query}
 Answer:
 """)
 
+    # 💡 修复 4：链条直接接收已经格式化好/或检索出来的 docs，避免二次检索逻辑冲突
     rag_chain = (
-        {"context": rerank_retriever | format_docs, "query": RunnablePassthrough()}
+        {
+            "context": RunnableLambda(lambda x: format_docs(x["context"])),
+            "query": lambda x: x["query"]
+        }
         | prompt
         | llm
         | StrOutputParser()
@@ -124,16 +131,20 @@ if prompt_input := st.chat_input("输入关于苹果财报的问题 (如: What a
 
     # 6.2 渲染 AI 气泡并执行打字机流式输出
     with st.chat_message("assistant"):
-        # 先检索文档，提取出处的元数据
+        # 1. 显式进行一次精准检索
         retrieved_docs = rerank_retriever.invoke(prompt_input)
-        sources = [f"{doc.metadata.get('Part', 'N/A')} -> {doc.metadata.get('Item', 'N/A')} -> {doc.metadata.get('Section', 'N/A')}" for doc in retrieved_docs]
+        
+        # 2. 提取前端用于展开展现的出处
+        sources = [
+            f"[Chunk {i+1}] {doc.metadata.get('Part', 'N/A')} -> {doc.metadata.get('Item', 'N/A')} -> {doc.metadata.get('Section', 'N/A')}" 
+            for i, doc in enumerate(retrieved_docs)
+        ]
 
+        # 3. 将现成的 retrieved_docs 塞给管道，顺畅流式打印！
         def generate_response():
-            # 手动把 context 替换为现成的 retrieved_docs
             for chunk in rag_chain.stream({"context": retrieved_docs, "query": prompt_input}):
                 yield chunk
 
-        # 💡 关键点：用 st.write_stream 替代 print()，这样才会打字吐到浏览器上！
         full_response = st.write_stream(generate_response)
 
         # 展开显示参考来源
