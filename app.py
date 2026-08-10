@@ -1,15 +1,20 @@
 import os
+from langchain.retrievers import BM25Retriever, ContextualCompressionRetriever
 import streamlit as st
+from src.chunker import chunk_markdown_file_new
 
 # 1. 设置环境变量，绕过本地代理
 os.environ["NO_PROXY"] = "localhost,127.0.0.1"
 os.environ["no_proxy"] = "localhost,127.0.0.1"
 
+from langchain.retrievers import EnsembleRetriever
 from langchain_ollama import OllamaEmbeddings, ChatOllama
 from langchain_chroma import Chroma
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
+from langchain_community.cross_encoders import HuggingFaceCrossEncoder
+from langchain.retrievers.document_compressors import CrossEncoderReranker
 
 # 2. 页面基础属性设置
 st.set_page_config(page_title="Apple 财报 AI 助手", page_icon="🍎", layout="wide")
@@ -31,51 +36,71 @@ def load_rag_chain(
         persist_directory=persist_dir,
         embedding_function=embeddings
     )
-    retriever = vector_store.as_retriever(search_kwargs={"k": 2})
-
+    
+    docs = chunk_markdown_file_new("./data/apple_10k_2025_claude_with_table_tags.md")
+    bm25_retriever = BM25Retriever.from_documents(docs, k=30)
+    retriever = vector_store.as_retriever(search_kwargs={"k": 30})
+    hybrid_retriever = EnsembleRetriever(
+        retrievers=[retriever, bm25_retriever],
+        weights=[0.7, 0.3]
+    )
+    encoder_model = HuggingFaceCrossEncoder(model_name="BAAI/bge-reranker-base")
+    compressor = CrossEncoderReranker(model=encoder_model, top_n=5)
+    rerank_retriever = ContextualCompressionRetriever(
+        base_compressor=compressor, 
+        base_retriever=hybrid_retriever
+    )
     llm = ChatOllama(
         model=llm_model,
         temperature=0.0,
         base_url="http://127.0.0.1:11434",
         num_ctx=2048
     )
-
     def format_docs(docs):
         formatted = []
         for doc in docs:
             part = doc.metadata.get("Part", "N/A")
             item = doc.metadata.get("Item", "N/A")
-            formatted.append(f"【Source: {part} -> {item}】\n{doc.page_content}")
+            section = doc.metadata.get("Section", "N/A")
+            formatted.append(f"【Source: {part} -> {item} -> {section}】\n{doc.page_content}")
         return "\n\n" + "=" * 40 + "\n\n".join(formatted)
 
-    prompt = ChatPromptTemplate.from_template("""You are an expert financial analyst. Answer the question strictly based on the following context.
+    prompt = ChatPromptTemplate.from_template("""You are a senior financial analyst assistant. Answer the user's question accurately, completely, and STRICTLY based on the provided [Reference Context].
 
-Context:
+【CRITICAL FINANCIAL CONSTRAINTS】:
+1. 📖 FULL CONTEXT SCAN: Carefully inspect ALL provided context chunks. Do not stop or draw conclusions after reading only the first chunk.
+2. 🎯 GRANULARITY & BREAKDOWN MATCHING:
+   - If the query requests a breakdown or disaggregation (e.g., "by category", "by segment", "by region"), you MUST locate and extract line-item details (e.g., iPhone, Mac, Services).
+   - STRICTLY FORBIDDEN: Returning only high-level "Total" figures when itemized breakdown tables are present in the context.
+3. 📊 MANDATORY MARKDOWN FORMATTING:
+   - Present multi-year numerical metrics using a clean Markdown table format:
+     | Category / Line Item | 2025 | 2024 | 2023 |
+   - Preserve units of measure (e.g., "$ in millions") exactly as reported in the context.
+4. 📌 IN-TEXT CITATIONS:
+   - Append source citations using [Chunk X] at the end of key figures or tables to indicate where the data originated (e.g., "$12,345 million [Chunk 2]").
+5. 🛡️ STRICT GROUNDING & NO HALLUCINATION:
+   - Rely EXCLUSIVELY on the provided context. Do not calculate, extrapolate, or infer missing figures using external knowledge.
+   - If the context lacks sufficient information, state clearly: "The provided context does not contain sufficient details to answer this question."
+
+【Reference Context】:
 {context}
 
-Question: 
-{question}
-
-Requirements:
-1. Strict Context Alignment: Base your answer 100% strictly on the provided context. Do NOT use external knowledge, prior assumptions, or logical extrapolation.
-2. Handling Tables & Structured Data: When extracting numbers or facts from tables, carefully align row items with their corresponding column headers to ensure accurate mapping.
-3. Citations: Cite the section name, item title, or heading from the context where applicable. If no specific title is present in the context, state the facts directly without inventing titles.
-4. Refusal Protocol: If the context does not contain enough explicit information to answer the question, state exactly: "Based on the provided sections, I cannot answer this question."
-
+【User Query:
+{query}
 Answer:
 """)
 
     rag_chain = (
-        {"context": retriever | format_docs, "question": RunnablePassthrough()}
+        {"context": rerank_retriever | format_docs, "query": RunnablePassthrough()}
         | prompt
         | llm
         | StrOutputParser()
     )
 
-    return retriever, rag_chain
+    return rerank_retriever, rag_chain
 
 # 加载 RAG 链对象
-retriever, rag_chain = load_rag_chain()
+rerank_retriever, rag_chain = load_rag_chain()
 
 # 4. 初始化对话历史消息列表
 if "messages" not in st.session_state:
@@ -100,12 +125,12 @@ if prompt_input := st.chat_input("输入关于苹果财报的问题 (如: What a
     # 6.2 渲染 AI 气泡并执行打字机流式输出
     with st.chat_message("assistant"):
         # 先检索文档，提取出处的元数据
-        retrieved_docs = retriever.invoke(prompt_input)
+        retrieved_docs = rerank_retriever.invoke(prompt_input)
         sources = [f"{doc.metadata.get('Part', 'N/A')} -> {doc.metadata.get('Item', 'N/A')} -> {doc.metadata.get('Section', 'N/A')}" for doc in retrieved_docs]
 
-        # 定义生成器，把 LLM 吐出来的 Chunk 传递给 Streamlit
         def generate_response():
-            for chunk in rag_chain.stream(prompt_input):
+            # 手动把 context 替换为现成的 retrieved_docs
+            for chunk in rag_chain.stream({"context": retrieved_docs, "query": prompt_input}):
                 yield chunk
 
         # 💡 关键点：用 st.write_stream 替代 print()，这样才会打字吐到浏览器上！
