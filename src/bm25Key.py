@@ -8,7 +8,6 @@ from langchain.retrievers import ContextualCompressionRetriever
 from langchain_community.document_compressors.flashrank_rerank import FlashrankRerank
 from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 from langchain.retrievers.document_compressors import CrossEncoderReranker
-# 假设你之前写好的切片函数
 from src.chunker import chunk_markdown_file_new
 def financial_tokenizer(text: str) -> list[str]:
     """
