@@ -1,4 +1,7 @@
 import os
+
+os.environ["ANONYMIZED_TELEMETRY"] = "False"
+
 import re
 from langchain_community.retrievers import BM25Retriever
 from langchain.retrievers import EnsembleRetriever

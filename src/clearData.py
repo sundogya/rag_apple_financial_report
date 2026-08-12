@@ -104,6 +104,9 @@ def auto_clean_markdown_file(file_path: str,output_path: str = None):
     print("✅ 自动化管道处理完成！已被分割的表格已全自动缝合。")
 
 import os
+
+os.environ["ANONYMIZED_TELEMETRY"] = "False"
+
 import re
 
 def add_table_tags_to_file(

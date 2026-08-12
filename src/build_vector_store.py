@@ -1,5 +1,11 @@
 import os
+
+os.environ["ANONYMIZED_TELEMETRY"] = "False"
+
 import os
+
+os.environ["ANONYMIZED_TELEMETRY"] = "False"
+
 import pickle
 import shutil
 
@@ -81,7 +87,7 @@ def persist_rag_database(
     # --------------------------------------------------
     print("🔍 正在构建 BM25 关键词索引...")
     bm25_retriever = BM25Retriever.from_documents(child_docs)
-    bm25_retriever.k = 30  # 设置粗召回 Top 30
+    bm25_retriever.k = 50  # 设置粗召回 Top 50
 
     with open(bm25_store_path, "wb") as f:
         pickle.dump(bm25_retriever, f)

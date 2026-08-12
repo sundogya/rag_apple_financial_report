@@ -1,4 +1,7 @@
 import os
+
+os.environ["ANONYMIZED_TELEMETRY"] = "False"
+
 import re
 import uuid
 from langchain_text_splitters import (
