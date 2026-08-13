@@ -78,7 +78,7 @@ sudo apt-get install -y poppler-utils tesseract-ocr
 
 ### Python Dependencies
 ```bash
-pip install langchain langchain-community langchain-ollama langchain-chroma rank-bm25 sentence-transformers streamlit ragas
+pip install -r requirements.txt
 ```
 
 ---
