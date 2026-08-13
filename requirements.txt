@@ -39,3 +39,6 @@ streamlit>=1.35.0
 python-dotenv>=1.0.1
 pydantic>=2.7.0
 olefile>=0.47
+
+# --- Extras ---
+python-dotenv
