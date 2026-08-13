@@ -113,9 +113,9 @@ ollama pull nomic-embed-text
 ollama pull llama3.1:8b
 ```
 
-Build the ChromaDB vector database and BM25 index:
+Build the ChromaDB vector database and BM25 index (Need to cancel the comment line):
 ```bash
-python scripts/build_index.py --input data/apple_10k_2025_claude_with_table_tags.md
+python opt.py
 ```
 
 ### 2. Run Terminal RAG Chain
