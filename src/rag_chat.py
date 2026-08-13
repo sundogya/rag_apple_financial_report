@@ -67,7 +67,7 @@ Answer:
 def get_top_unique_parent_docs(
     child_docs: list[Document], 
     parent_store: dict[str, Document], 
-    target_parent_count: int = 4
+    target_parent_count: int = 2
 ) -> list[Document]:
     seen_ids = set()
     parent_docs = []
@@ -136,7 +136,7 @@ def create_rag_chain(
         #     print(f"[{i+1}] Parent_ID: {parent_id}")
         #     print(f"    内容: {preview}...\n")
         # print("="*65 + "\n")
-        return get_top_unique_parent_docs(top_child_docs, parent_store, target_parent_count=4)
+        return get_top_unique_parent_docs(top_child_docs, parent_store, target_parent_count=2)
 
     rerank_retriever = RunnableLambda(rerank_then_fetch_unique_parent)
     
