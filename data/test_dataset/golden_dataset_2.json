@@ -1,0 +1,52 @@
+[
+  {
+    "question": "What were Apple's Net Sales by Category for iPad and Wearables, Home and Accessories in fiscal years 2025, 2024, and 2023?",
+    "ground_truth": "According to the Products and Services Performance table (in millions):\n- iPad: $28,023 (2025), $26,694 (2024), $28,300 (2023)\n- Wearables, Home and Accessories: $35,686 (2025), $37,005 (2024), $39,845 (2023)",
+    "category": "table_breakdown"
+  },
+  {
+    "question": "What was the operating income for the Americas, Europe, and Greater China segments in fiscal year 2025?",
+    "ground_truth": "According to Note 13 (Segment Information and Geographic Data), operating income in fiscal year 2025 was:\n- Americas: $72,480 million\n- Europe: $47,739 million\n- Greater China: $26,917 million",
+    "category": "table_breakdown"
+  },
+  {
+    "question": "How many shareholders of record did Apple have as of October 17, 2025?",
+    "ground_truth": "As of October 17, 2025, Apple had 22,429 shareholders of record.",
+    "category": "factoid"
+  },
+  {
+    "question": "How much did Apple spend on Research and Development (R&D) in fiscal year 2023?",
+    "ground_truth": "Apple spent $29,915 million on Research and Development in fiscal year 2023.",
+    "category": "factoid"
+  },
+  {
+    "question": "What plan is described in Exhibit 10.9 of Item 15 in Apple's Form 10-K?",
+    "ground_truth": "Exhibit 10.9 is the Apple Inc. Executive Cash Incentive Plan.",
+    "category": "specific_clause"
+  },
+  {
+    "question": "What were the notional amounts of foreign exchange derivative contracts not designated as accounting hedges as of September 27, 2025 and September 28, 2024?",
+    "ground_truth": "According to Note 4 (Financial Instruments), the notional amounts were $109,079 million as of September 27, 2025, and $91,493 million as of September 28, 2024.",
+    "category": "specific_clause"
+  },
+  {
+    "question": "What discount rates were applied to Apple's lease liabilities as of September 27, 2025 and September 28, 2024?",
+    "ground_truth": "According to Note 8 (Leases), the discount rate related to Apple's lease liabilities was 3.4% as of September 27, 2025, and 3.1% as of September 28, 2024.",
+    "category": "specific_clause"
+  },
+  {
+    "question": "How much cash did Apple pay for dividends and dividend equivalents in fiscal years 2025, 2024, and 2023?",
+    "ground_truth": "According to the Consolidated Statements of Cash Flows, Apple paid $15,421 million in 2025, $15,234 million in 2024, and $15,025 million in 2023 for dividends and dividend equivalents.",
+    "category": "factoid"
+  },
+  {
+    "question": "What is Apple's total annual expenditure on solar power plant investments in Nevada for fiscal year 2025?",
+    "ground_truth": "The provided context does not contain information regarding Apple's specific annual expenditure on solar power plant investments in Nevada.",
+    "category": "negative_test"
+  },
+  {
+    "question": "What were the specific quarterly unit sales for the Apple Watch Series 11 in the fourth quarter of fiscal year 2025?",
+    "ground_truth": "The provided context does not contain detailed quarterly unit sales or sales breakdowns for specific product models like the Apple Watch Series 11.",
+    "category": "negative_test"
+  }
+]

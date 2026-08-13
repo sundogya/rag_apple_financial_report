@@ -1,0 +1,52 @@
+[
+  {
+    "question": "What was Apple's total Cost of Sales broken down by Products and Services in fiscal years 2025 and 2024?",
+    "ground_truth": "According to the Consolidated Statements of Operations (in millions):\n- Products Cost of Sales: $194,116 (2025), $185,233 (2024)\n- Services Cost of Sales: $26,844 (2025), $25,119 (2024)\n- Total Cost of Sales: $220,960 (2025), $210,352 (2024)",
+    "category": "table_breakdown"
+  },
+  {
+    "question": "What is the schedule of term debt principal maturities for 2029, 2030, and Thereafter as of September 27, 2025?",
+    "ground_truth": "According to Note 9 (Debt), as of September 27, 2025, the principal maturities are:\n- 2029: $5,235 million\n- 2030: $4,972 million\n- Thereafter: $49,303 million",
+    "category": "table_breakdown"
+  },
+  {
+    "question": "What was the weighted-average interest rate on Apple's commercial paper as of September 27, 2025 and September 28, 2024?",
+    "ground_truth": "The weighted-average interest rate of Apple's commercial paper was 4.19% as of September 27, 2025, and 5.00% as of September 28, 2024.",
+    "category": "factoid"
+  },
+  {
+    "question": "What percentage of total trade receivables was represented by third-party cellular network carriers as of September 27, 2025 and September 28, 2024?",
+    "ground_truth": "Third-party cellular network carriers accounted for 34% of total trade receivables as of September 27, 2025, and 38% as of September 28, 2024.",
+    "category": "factoid"
+  },
+  {
+    "question": "What document is listed as Exhibit 3.1 in Item 15 of Apple's Form 10-K?",
+    "ground_truth": "Exhibit 3.1 is the Restated Articles of Incorporation of the Registrant filed on August 3, 2020.",
+    "category": "specific_clause"
+  },
+  {
+    "question": "What was the ruling of the European Court of Justice (ECJ) on September 10, 2024, regarding the 2016 State Aid Decision?",
+    "ground_truth": "On September 10, 2024, the ECJ set aside the 2020 judgment and confirmed the European Commission's 2016 State Aid Decision, upholding the order for Ireland to recover additional taxes from Apple.",
+    "category": "specific_clause"
+  },
+  {
+    "question": "What is the maximum potential fine percentage that the European Commission can impose under the DMA Article 6(4) Investigation?",
+    "ground_truth": "Under the Article 6(4) Investigation, if the European Commission makes a final determination of a violation, it may impose fines up to 10% of Apple's annual worldwide net sales.",
+    "category": "specific_clause"
+  },
+  {
+    "question": "How many shares of common stock did Apple repurchase during fiscal year 2025 according to the Consolidated Statements of Shareholders' Equity?",
+    "ground_truth": "Apple repurchased 401,672,000 shares of common stock during fiscal year 2025.",
+    "category": "factoid"
+  },
+  {
+    "question": "What was the total net revenue generated specifically from refurbished MacBook sales in fiscal year 2025?",
+    "ground_truth": "The provided context does not contain detailed financial breakdown or revenue information specifically for refurbished MacBook sales.",
+    "category": "negative_test"
+  },
+  {
+    "question": "How much did Apple pay in licensing fees and royalties to music publishers for Apple Music in 2025?",
+    "ground_truth": "The provided context does not contain information regarding the specific amounts paid in licensing fees or royalties to music publishers.",
+    "category": "negative_test"
+  }
+]

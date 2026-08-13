@@ -70,14 +70,28 @@ def persist_rag_database(
         model=embedding_model_name, 
         base_url="http://127.0.0.1:11434"
     )
-
+    valid_docs = [doc for doc in child_docs if doc.page_content and doc.page_content.strip()]
     # 批量构建 ChromaDB（将 child_docs 写入磁盘）
-    vectorstore = Chroma.from_documents(
-        documents=child_docs,
-        embedding=embeddings,
-        persist_directory=chroma_dir,
-        collection_name="apple_2025_10k_child",
-    )
+    # vectorstore = Chroma.from_documents(
+    #     documents=child_docs,
+    #     embedding=embeddings,
+    #     persist_directory=chroma_dir,
+    #     collection_name="apple_2025_10k_child",
+    # )
+    batch_size = 64
+    vectorstore = None
+    for i in range(0, len(valid_docs), batch_size):
+            batch = valid_docs[i : i + batch_size]
+            print(f"🚀 正在向量化并入库 [{i+1} ~ {min(i+batch_size, len(valid_docs))}/{len(valid_docs)}] ...")
+            
+            if vectorstore is None:
+                vectorstore = Chroma.from_documents(
+                    documents=batch,
+                    embedding=embeddings,
+                    persist_directory=chroma_dir
+                )
+            else:
+                vectorstore.add_documents(documents=batch)
     print(
         f"✅ ChromaDB 构建完成！共写入 {vectorstore._collection.count()} 条子块向量。"
     )

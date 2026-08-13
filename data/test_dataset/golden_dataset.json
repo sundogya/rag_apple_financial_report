@@ -1,0 +1,102 @@
+[
+  {
+    "question": "What were Apple's Net Sales by Category for iPhone, Mac, and Services in 2025, 2024, and 2023?",
+    "ground_truth": "According to the Products and Services Performance table (dollars in millions):\n- iPhone: $209,586 (2025), $201,183 (2024), $200,583 (2023)\n- Mac: $33,708 (2025), $29,984 (2024), $29,357 (2023)\n- Services: $109,158 (2025), $96,169 (2024), $85,200 (2023)",
+    "category": "table_breakdown"
+  },
+  {
+    "question": "What were Apple's Net Sales by reportable segment for Americas, Greater China, and Europe in fiscal year 2025?",
+    "ground_truth": "In fiscal year 2025, Net Sales by reportable segment were:\n- Americas: $178,353 million\n- Europe: $111,032 million\n- Greater China: $64,377 million",
+    "category": "table_breakdown"
+  },
+  {
+    "question": "How much did Apple spend on Research and Development (R&D) in fiscal years 2025 and 2024?",
+    "ground_truth": "Apple's research and development expense was $34,550 million in fiscal year 2025 and $31,370 million in fiscal year 2024.",
+    "category": "factoid"
+  },
+  {
+    "question": "What is described in Exhibit 4.9 of Item 15 in Apple's Form 10-K?",
+    "ground_truth": "Exhibit 4.9 is an Officer's Certificate of the Registrant, dated as of September 17, 2015 (1.375% Notes due 2024 and 2.000% Notes due 2027).",
+    "category": "specific_clause"
+  },
+  {
+    "question": "What is the description and effective date of Exhibit 10.10 in Item 15?",
+    "ground_truth": "Exhibit 10.10 is the Form of CEO Restricted Stock Unit Award Agreement under 2022 Employee Stock Plan, effective as of September 25, 2022.",
+    "category": "specific_clause"
+  },
+  {
+    "question": "What fine did the European Commission impose on Apple on April 23, 2025, in relation to the Article 5(4) DMA Investigation?",
+    "ground_truth": "On April 23, 2025, the Commission fined Apple €500 million in the Article 5(4) Investigation and issued a cease and desist order requiring Apple to remove technical and commercial restrictions that prevent developers from steering users to alternative distribution channels outside the App Store.",
+    "category": "specific_clause"
+  },
+  {
+    "question": "What ruling did the California District Court make on April 30, 2025, regarding Apple and the 2021 Injunction in the Epic Games litigation?",
+    "ground_truth": "On April 30, 2025, the California District Court found Apple to be in violation of the 2021 Injunction and enjoined Apple from imposing any commission or fee on purchases that consumers make outside an app, referring Apple to the U.S. Attorney for the Northern District of California for a determination on criminal contempt proceedings.",
+    "category": "specific_clause"
+  },
+  {
+    "question": "How many full-time equivalent employees did Apple have as of September 27, 2025?",
+    "ground_truth": "As of September 27, 2025, Apple had approximately 166,000 full-time equivalent employees.",
+    "category": "factoid"
+  },
+  {
+    "question": "What were Apple's gross margin percentages for Products, Services, and Total Net Sales in fiscal year 2025?",
+    "ground_truth": "In fiscal year 2025, the gross margin percentages were:\n- Products: 36.8%\n- Services: 75.4%\n- Total gross margin percentage: 46.9%",
+    "category": "table_breakdown"
+  },
+  {
+    "question": "What was the total amount of cash, cash equivalents, and marketable securities held by Apple as of September 27, 2025?",
+    "ground_truth": "Apple's total balances of cash, cash equivalents, and marketable securities totaled $132.4 billion ($132,420 million) as of September 27, 2025 ($35,934M in cash/cash equivalents, $18,763M in current marketable securities, and $77,723M in non-current marketable securities).",
+    "category": "factoid"
+  },
+  {
+    "question": "What was the one-time income tax charge recorded by Apple in the fourth quarter of 2024 following the European Court of Justice (ECJ) judgment on the State Aid Decision?",
+    "ground_truth": "Apple recorded a one-time income tax charge of $10.2 billion, net, representing $15.8 billion payable to Ireland via release of amounts held in escrow, partially offset by a U.S. foreign tax credit of $4.8 billion and a decrease in unrecognized tax benefits of $823 million.",
+    "category": "specific_clause"
+  },
+  {
+    "question": "Who was announced to succeed Chris Kondo as Principal Accounting Officer starting January 1, 2026?",
+    "ground_truth": "Ben Borders, Apple's Director of Technical Accounting, will become Senior Director of Corporate Accounting and assume the role of Principal Accounting Officer on January 1, 2026.",
+    "category": "factoid"
+  },
+  {
+    "question": "What is the schedule of term debt principal maturities for fiscal years 2026, 2027, and 2028 as of September 27, 2025?",
+    "ground_truth": "As of September 27, 2025, the term debt principal maturities are:\n- 2026: $12,393 million\n- 2027: $10,078 million\n- 2028: $9,300 million",
+    "category": "table_breakdown"
+  },
+  {
+    "question": "What is Apple's total planned capital expenditure for building a semiconductor manufacturing facility in Germany in 2026?",
+    "ground_truth": "The provided context does not contain sufficient information to answer this question as there is no mention of a semiconductor manufacturing facility in Germany.",
+    "category": "negative_test"
+  },
+  {
+    "question": "How many units of Apple Vision Pro were sold globally during fiscal year 2025?",
+    "ground_truth": "The provided context does not contain sufficient details to answer this question regarding the exact number of Apple Vision Pro units sold in 2025.",
+    "category": "negative_test"
+  },
+  {
+    "question": "How much common stock did Apple repurchase and what total dividends were paid during fiscal year 2025?",
+    "ground_truth": "During 2025, Apple repurchased $89.3 billion of its common stock and paid dividends and dividend equivalents of $15.4 billion.",
+    "category": "factoid"
+  },
+  {
+    "question": "What are the maturity date and interest rate of the 2025 Notes listed under Section 12 registered securities in Exhibit 4.1?",
+    "ground_truth": "The 2025 Notes (€1,000,000,000 principal amount issued) have a maturity date of November 15, 2025 and an interest rate of 0.000%.",
+    "category": "specific_clause"
+  },
+  {
+    "question": "What percentage of Apple's total net sales in 2025 came from direct vs. indirect distribution channels?",
+    "ground_truth": "During 2025, Apple's net sales through its direct and indirect distribution channels accounted for 40% and 60%, respectively, of total net sales.",
+    "category": "factoid"
+  },
+  {
+    "question": "What were Apple's Total Current Assets and Total Current Liabilities as of September 27, 2025?",
+    "ground_truth": "As of September 27, 2025:\n- Total current assets: $147,957 million\n- Total current liabilities: $165,631 million",
+    "category": "table_breakdown"
+  },
+  {
+    "question": "Who serves as Apple's independent registered public accounting firm and what opinion did they express on the 2025 financial statements?",
+    "ground_truth": "Ernst & Young LLP serves as the independent registered public accounting firm (serving since 2009) and expressed an unqualified opinion that the financial statements present fairly, in all material respects, the financial position of Apple Inc. as of September 27, 2025 and September 28, 2024.",
+    "category": "specific_clause"
+  }
+]

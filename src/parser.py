@@ -1,9 +1,11 @@
 import pdfplumber
 from unstructured.partition.pdf import partition_pdf
-import fitz  # PyMuPDF
+import pymupdf  # PyMuPDF
 import base64
 import ollama
 import os
+os.environ["ANONYMIZED_TELEMETRY"] = "False"
+
 # 1. 全局配置：强制绕过代理
 os.environ["NO_PROXY"] = "localhost,127.0.0.1"
 os.environ["no_proxy"] = "localhost,127.0.0.1"
@@ -65,7 +67,7 @@ def process_full_pdf_with_vlm(pdf_path: str, output_md_path: str, batch_size: in
     """
     全自动分批管道：按 batch_size（如每 2 页一组）循环调用 VLM 并自动拼接 Markdown
     """
-    doc = fitz.open(pdf_path)
+    doc = pymupdf.open(pdf_path)
     total_pages = len(doc)
     print(f"📄 开始全自动解析 PDF，共 {total_pages} 页...")
 

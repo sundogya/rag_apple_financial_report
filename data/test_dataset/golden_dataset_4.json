@@ -1,0 +1,52 @@
+[
+  {
+    "question": "What were Apple's Net Sales in the U.S. and China (including Hong Kong and Taiwan) for 2025, 2024, and 2023?",
+    "ground_truth": "According to Note 13 (Geographic Data, in millions):\n- U.S.: $151,790 (2025), $142,196 (2024), $138,573 (2023)\n- China: $64,377 (2025), $66,952 (2024), $72,559 (2023)",
+    "category": "table_breakdown"
+  },
+  {
+    "question": "What were the balances for Non-current Marketable Securities and Property, Plant and Equipment, net as of September 27, 2025 and September 28, 2024?",
+    "ground_truth": "According to the Consolidated Balance Sheets (in millions):\n- Non-current marketable securities: $77,723 (2025), $91,479 (2024)\n- Property, plant and equipment, net: $49,834 (2025), $45,680 (2024)",
+    "category": "table_breakdown"
+  },
+  {
+    "question": "What were Apple's foreign pretax earnings in fiscal years 2025, 2024, and 2023?",
+    "ground_truth": "Foreign pretax earnings were $82.0 billion in 2025, $77.3 billion in 2024, and $72.9 billion in 2023.",
+    "category": "factoid"
+  },
+  {
+    "question": "Who signed Apple's Form 10-K as Senior Vice President, Chief Financial Officer on October 31, 2025?",
+    "ground_truth": "Kevan Parekh signed the Form 10-K as Senior Vice President, Chief Financial Officer.",
+    "category": "factoid"
+  },
+  {
+    "question": "What are the currency, issue date, and maturity date of the 3.050% Notes listed under Exhibit 4.1?",
+    "ground_truth": "The 3.050% Notes due 2029 (£750,000,000 principal amount issued) were issued on July 31, 2015, in British pounds sterling (£) and mature on July 31, 2029.",
+    "category": "specific_clause"
+  },
+  {
+    "question": "What were Apple's total unconditional purchase obligations with a remaining term in excess of one year as of September 27, 2025?",
+    "ground_truth": "According to Note 12 (Commitments, Contingencies and Supply Concentrations), total unconditional purchase obligations with a remaining term in excess of one year were $13,308 million.",
+    "category": "specific_clause"
+  },
+  {
+    "question": "What was the total balance of gross unrecognized tax benefits as of September 27, 2025, and how much of it would impact the effective tax rate if recognized?",
+    "ground_truth": "As of September 27, 2025, the total amount of gross unrecognized tax benefits was $23.2 billion ($23,242 million), of which $10.6 billion would impact Apple's effective tax rate if recognized.",
+    "category": "specific_clause"
+  },
+  {
+    "question": "What is the primary executive office address and zip code of Apple Inc. listed in the Form 10-K header?",
+    "ground_truth": "The address of Apple's principal executive office is One Apple Park Way, Cupertino, California 95014.",
+    "category": "factoid"
+  },
+  {
+    "question": "How much funding did Apple allocate to quantum computing R&D initiatives during fiscal year 2025?",
+    "ground_truth": "The provided context does not contain any details or figures regarding funding allocated to quantum computing research and development.",
+    "category": "negative_test"
+  },
+  {
+    "question": "What was the total monetary value of trade-in allowances granted to customers switching from competitor devices in 2025?",
+    "ground_truth": "The provided context does not mention the specific total monetary value of trade-in allowances granted for competitor devices in 2025.",
+    "category": "negative_test"
+  }
+]

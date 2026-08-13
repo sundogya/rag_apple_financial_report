@@ -13,7 +13,7 @@ from ragas.metrics import (
 from src.rag_chat import create_rag_chain
 
 
-def run_evaluation(file_path: str = "./data/golden_dataset.json"):
+def run_evaluation(file_path: str = "./data/golden_dataset.json",output_path: str = "./data/ragas_final_report.csv"):
     print("🚀 正在加载 RAG 引擎与评估数据集...")
 
     # 加载 RAG 链与测试数据
@@ -67,8 +67,8 @@ def run_evaluation(file_path: str = "./data/golden_dataset.json"):
 
     # 保存预测过程数据，防止断网或计算失败
     df_results = pd.DataFrame(data_dict)
-    df_results.to_csv("./data/rag_evaluation_raw_results.csv", index=False)
-    print("\n✅ RAG 运行预测结果已保存至 ./data/rag_evaluation_raw_results.csv")
+    df_results.to_csv(output_path, index=False)
+    print("\n✅ RAG 运行预测结果已保存至 {output_path}，可用于后续 Ragas 评测。")
 
     # 4. 执行 Ragas 多维度定量评估打分
     print("\n🧮 启动 Ragas 多维度自动评分器 (Faithfulness, Recall, Precision, Relevance)...")
@@ -91,8 +91,8 @@ def run_evaluation(file_path: str = "./data/golden_dataset.json"):
 
         # 导出评测报表
         results_df = results.to_pandas()
-        results_df.to_csv("./data/ragas_final_report.csv", index=False)
-        print("📄 详细评测报告已成功导出至 ./data/ragas_final_report.csv")
+        results_df.to_csv(output_path, index=False)
+        print(f"📄 详细评测报告已成功导出至 {output_path}")
 
     except Exception as e:
         print(f"\n⚠️ Ragas 评分打分器执行异常 (可检查 API / 本地 Judge 模型配置): {e}")

@@ -178,7 +178,7 @@ def save_chunks_as_vector_store(file_path: str, persist_dir="./data/chroma_db_ol
     return vector_store
 def chunk_markdown_file_to_parent_child(file_path: str):
     parent_docs,parent_store = chunk_markdown_file_to_parent(file_path)
-    child_docs = chunk_parent_docs_to_child(parent_docs)
+    child_docs = chunk_parent_docs_to_child_optimized(parent_docs)
     return parent_docs, parent_store, child_docs
 
 def is_junk_text(text: str) -> bool:
@@ -195,12 +195,31 @@ def clean_exhibit_tail(text: str) -> str:
         # 只保留 Exhibit 出现之前的正文内容
         return text[: exhibit_match.start()].strip()
     return text.strip()
+def convert_table_rows_to_text(header_line: str, data_lines: list[str]) -> str:
+    """将 Markdown 表格的数据行转化为自然语言陈述句，极大地帮助向量模型理解数字"""
+    headers = [h.strip() for h in header_line.split("|") if h.strip()]
+    summaries = []
+    
+    for line in data_lines:
+        cells = [c.strip() for c in line.split("|") if c.strip()]
+        if len(cells) >= 2 and len(headers) >= 2:
+            row_name = cells[0]
+            row_details = []
+            for h, c in zip(headers[1:], cells[1:]):
+                if c and c != "-":
+                    row_details.append(f"{h} is {c}")
+            if row_details:
+                summaries.append(f"- {row_name}: " + ", ".join(row_details))
+                
+    if summaries:
+        return "【Row Summaries】:\n" + "\n".join(summaries)
+    return ""
 # ==========================================
 # 模块一：父块切分函数 (chunk_markdown_file_to_parent)
 # ==========================================
 def chunk_markdown_file_to_parent(
     file_path: str,
-    max_parent_text_size: int = 1500,
+    max_parent_text_size: int = 1300,
     parent_text_overlap: int = 200,
 ) -> tuple[list[Document], dict[str, Document]]:
     if not os.path.exists(file_path):
@@ -282,15 +301,13 @@ def chunk_markdown_file_to_parent(
             table_prefix_text = ""
 
             if non_table_text:
-                clean_text = re.sub(
-                    r"<!--\s*TABLE_(?:START|END):.*?-->", "", non_table_text
-                )
-                # clean_text = clean_exhibit_tail(clean_text)
+                clean_text = re.sub(r"<!--\s*TABLE_(?:START|END):.*?-->", "", non_table_text)
 
                 if not is_junk_text(clean_text):
                     text_lines = clean_text.split("\n")
                     split_pos = len(text_lines)
 
+                    # 从后往前找，找到紧挨着表格的那一两句引言（比如 "The following table shows..."）
                     for i in range(len(text_lines) - 1, -1, -1):
                         line_str = text_lines[i].strip().lower()
                         if not line_str:
@@ -303,6 +320,7 @@ def chunk_markdown_file_to_parent(
                                     "shows net sales",
                                     "as follows",
                                     "dollars in millions",
+                                    "net sales by",
                                 ]
                             )
                             or line_str.startswith("###")
@@ -311,9 +329,8 @@ def chunk_markdown_file_to_parent(
                             break
 
                     normal_text = "\n".join(text_lines[:split_pos]).strip()
-                    table_prefix_text = "\n".join(
-                        text_lines[split_pos:]
-                    ).strip()
+                    # 💡 提取出这句引言，做为表格的“灵魂前缀”
+                    table_prefix_text = "\n".join(text_lines[split_pos:]).strip()
 
                     if not is_junk_text(normal_text):
                         p_docs = parent_text_splitter.create_documents(
@@ -327,6 +344,7 @@ def chunk_markdown_file_to_parent(
                                 parent_docs.append(p_doc)
                                 parent_store[p_id] = p_doc
 
+            # 💡 核心组合：[引言前缀] + \n\n + [表格数据]，合成不可分割的 Table Parent
             combined_table_content = (
                 f"{table_prefix_text}\n\n{raw_table_content}".strip()
                 if table_prefix_text
@@ -339,7 +357,7 @@ def chunk_markdown_file_to_parent(
                 metadata={
                     **base_metadata,
                     "parent_id": p_id,
-                    "type": "table",
+                    "type": "table",      # 强制标明是 table 类型！
                     "table_id": table_id,
                 },
             )
@@ -374,6 +392,121 @@ def chunk_markdown_file_to_parent(
 # ==========================================
 # 模块二：子块切分函数 (chunk_parent_docs_to_child)
 # ==========================================
+def chunk_parent_docs_to_child_optimized(
+    parent_docs: list[Document],
+    child_chunk_size: int = 400,
+    child_chunk_overlap: int = 80,
+    max_table_rows: int = 4,
+) -> list[Document]:
+    """
+    优化版 Child 切片逻辑：
+    1. 增加 Section Header 注入：给每一个 Child 顶部添加 [Location Context]
+    2. 增加 Table-to-Text 增强：在 Child 表格底部自动生成自然语言摘要
+    3. 保留引言句：将 Parent 中的 table_prefix_text 完整带给 Child
+    """
+    child_text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=child_chunk_size,
+        chunk_overlap=child_chunk_overlap,
+        separators=["\n\n", "\n", "。", "！", "？", " ", ""],
+    )
+
+    child_chunks: list[Document] = []
+
+    for p_doc in parent_docs:
+        base_metadata = p_doc.metadata.copy()
+        doc_type = base_metadata.get("type", "text")
+        parent_id = base_metadata.get("parent_id")
+        
+        # 📌 构建统一的位置元数据前缀（包含 Part -> Item -> Section）
+        location_parts = []
+        if base_metadata.get("Part"):
+            location_parts.append(base_metadata['Part'])
+        if base_metadata.get("Item"):
+            location_parts.append(base_metadata['Item'])
+        if base_metadata.get("Section"):
+            location_parts.append(base_metadata['Section'])
+            
+        header_context_str = f"【Context: {' > '.join(location_parts)}】\n" if location_parts else ""
+
+        # --------------------------------------------------
+        # 分支 A： Parent 为【表格】 -> 行切分 + 表头前缀 + 语义摘要注入
+        # --------------------------------------------------
+        if doc_type == "table":
+            table_lines = [l.strip() for l in p_doc.page_content.split("\n") if l.strip()]
+
+            if len(table_lines) >= 2 and "|" in table_lines[0]:
+                has_divider = "---" in table_lines[1] or ":---" in table_lines[1]
+
+                if has_divider:
+                    header_lines = table_lines[:2]
+                    data_lines = table_lines[2:]
+                else:
+                    header_lines = [
+                        table_lines[0],
+                        "| " + " | ".join(["---"] * table_lines[0].count("|")) + " |",
+                    ]
+                    data_lines = table_lines[1:]
+
+                total_rows = len(data_lines)
+
+                if total_rows == 0:
+                    # 表格无数据行，直接做全量 Child
+                    full_content = f"{header_context_str}{p_doc.page_content}"
+                    child_chunks.append(
+                        Document(
+                            page_content=full_content,
+                            metadata={**base_metadata, "is_child": True, "row_range": "full"},
+                        )
+                    )
+                else:
+                    # 按 max_table_rows 切分，并强化 Child 的文本描述
+                    for i in range(0, total_rows, max_table_rows):
+                        sub_data = data_lines[i : i + max_table_rows]
+                        markdown_table = "\n".join(header_lines + sub_data)
+                        
+                        # 💡 核心强化 1：生成自然语言摘要
+                        semantic_summary = convert_table_rows_to_text(header_lines[0], sub_data)
+                        
+                        # 💡 核心强化 2：拼接 [层级前缀] + [Markdown 表格] + [语义摘要]
+                        child_text_components = [header_context_str, markdown_table]
+                        if semantic_summary:
+                            child_text_components.append(semantic_summary)
+                            
+                        enhanced_child_text = "\n\n".join(child_text_components)
+                        row_range_str = f"{i + 1}-{min(i + max_table_rows, total_rows)}"
+
+                        child_chunks.append(
+                            Document(
+                                page_content=enhanced_child_text,
+                                metadata={
+                                    **base_metadata,
+                                    "is_child": True,
+                                    "row_range": row_range_str,
+                                },
+                            )
+                        )
+            else:
+                # 降级处理
+                sub_docs = child_text_splitter.create_documents(
+                    texts=[f"{header_context_str}{p_doc.page_content}"],
+                    metadatas=[{**base_metadata, "is_child": True}],
+                )
+                child_chunks.extend(sub_docs)
+
+        # --------------------------------------------------
+        # 分支 B： Parent 为【正文】 -> 注入 Header 前缀后做滑动切分
+        # --------------------------------------------------
+        else:
+            # 在切分前给大段文本附加上 Context 头
+            text_to_split = f"{header_context_str}{p_doc.page_content}"
+            sub_docs = child_text_splitter.create_documents(
+                texts=[text_to_split],
+                metadatas=[{**base_metadata, "is_child": True}],
+            )
+            child_chunks.extend(sub_docs)
+
+    print(f"🚀 深度优化版 Child 切片完成！共得到 {len(child_chunks)} 个带语义增强的 Child Chunks。")
+    return child_chunks
 def chunk_parent_docs_to_child(
     parent_docs: list[Document],
     child_chunk_size: int = 300,

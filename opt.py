@@ -4,15 +4,15 @@ try:
     sys.modules['langchain_community.chat_models.vertexai'] = langchain_google_vertexai
 except ImportError:
     pass
-import src.parser
-import tests.fileCheck
-import tests.chunkCheck
-import tests.vectorCheck
+# import src.parser
+# import tests.fileCheck
+# import tests.chunkCheck
+# import tests.vectorCheck
 import tests.ragasCheck
-import src.clearData
+# import src.clearData
 import src.chunker
-import src.rag_chat
-import src.bm25Key
+# import src.rag_chat
+# import src.bm25Key
 
 # src.parser.convert_pdf_to_markdown("data/10k.pdf", "data/apple_10k_2025_pdfplumber.md")
 # src.parser.parse_pdf_to_elements("data/10k.pdf", "data/apple_10k_2025_unstructured.md")
@@ -33,4 +33,4 @@ import src.bm25Key
 # src.bm25Key.bm25_retrieval_test("data/apple_10k_2025_claude_with_table_tags.md")
 # src.bm25Key.hybrid_retrieval_test("data/apple_10k_2025_claude_with_table_tags.md",persist_dir="./data/chroma_db_ollama",query="Net sales 2025")
 # src.bm25Key.hybrid_retrieval_with_rerank_test(file_path="data/apple_10k_2025_claude_with_table_tags.md", query="net sales by category for 2025, 2024 and 2023")
-tests.ragasCheck.run_evaluation(file_path="data/golden_dataset.json")
+tests.ragasCheck.run_evaluation(file_path="data/test_dataset/golden_dataset_4.json", output_path="data/test_dataset_result/ragas_final_report_4.csv")
