@@ -36,7 +36,7 @@ with st.sidebar:
     st.markdown("""
     **系统架构信息:**
     - **LLM**: Ollama (`llama3.1:8b`)
-    - **Embedding**: `nomic-embed-text`
+    - **Embedding**: `BAAI/bge-small-en-v1.5` (Nomic Embed)
     - **Vector DB**: ChromaDB (Parent-Child)
     - **Reranker**: `bge-reranker-base`
     """)
