@@ -42,3 +42,4 @@ olefile>=0.47
 
 # --- Extras ---
 python-dotenv
+fastembed

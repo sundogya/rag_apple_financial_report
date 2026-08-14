@@ -22,6 +22,8 @@ from langchain_core.documents import Document
 from langchain_core.runnables import RunnableLambda
 from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 from langchain.retrievers.document_compressors import CrossEncoderReranker
+# from langchain_community.embeddings import FastEmbedEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
 # 项目根路径 (rag_apple_financial_report)
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -87,11 +89,13 @@ def create_rag_chain(
     persist_dir: str = None,
     parent_store_path: str = None,
     bm25_store_path: str = None,
-    embedding_model: str = "nomic-embed-text",
+    # embedding_model: str = "nomic-embed-text",
+    embedding_model: str = "BAAI/bge-small-en-v1.5",
     llm_model: str = "llama3.1:8b"
 ):
     """构建 RAG 链的核心逻辑（纯 Python，零 Streamlit 依赖）"""
-    persist_dir = persist_dir or str(BASE_DIR / "data" / "chroma_db_ollama_parent_child")
+    # persist_dir = persist_dir or str(BASE_DIR / "data" / "chroma_db_ollama_parent_child")
+    persist_dir = persist_dir or str(BASE_DIR / "data" / "chroma_db_ollama_parent_child_bge")
     parent_store_path = parent_store_path or (BASE_DIR / "data" / "store" / "parent_store.pkl")
     bm25_store_path = bm25_store_path or (BASE_DIR / "data" / "store" / "bm25_retriever.pkl")
 
@@ -100,26 +104,32 @@ def create_rag_chain(
     if not Path(bm25_store_path).exists():
         raise FileNotFoundError(f"未找到 BM25 检索器文件: {bm25_store_path}")
 
-    embeddings = OllamaEmbeddings(
-        model=embedding_model, 
-        base_url="http://127.0.0.1:11434"
+    # embeddings = OllamaEmbeddings(
+    #     model=embedding_model, 
+    #     base_url="http://127.0.0.1:11434"
+    # )
+    # embeddings = FastEmbedEmbeddings(model_name=embedding_model)
+    embeddings = HuggingFaceEmbeddings(
+        model_name=embedding_model,
+        model_kwargs={"device": "mps"},
+        encode_kwargs={"normalize_embeddings": True}
     )
     vector_store = Chroma(
         persist_directory=persist_dir,
         embedding_function=embeddings
     )
-    query_rewriter = query_transform_prompt | ChatOllama(model="llama3.1:8b", temperature=0.0) | StrOutputParser()
+    query_rewriter = query_transform_prompt | ChatOllama(model="llama3.1:8b", temperature=0.0,num_predict=50,num_ctx=512) | StrOutputParser()
     with open(parent_store_path, "rb") as f:
         parent_store = pickle.load(f)
     with open(bm25_store_path, "rb") as f:
         bm25_retriever: BM25Retriever = pickle.load(f)
-    retriever = vector_store.as_retriever(search_kwargs={"k": 30})
+    retriever = vector_store.as_retriever(search_kwargs={"k": 15})
     hybrid_retriever = EnsembleRetriever(
         retrievers=[retriever, bm25_retriever],
         weights=[0.5, 0.5]
     )
-    encoder_model = HuggingFaceCrossEncoder(model_name="BAAI/bge-reranker-base")
-    compressor = CrossEncoderReranker(model=encoder_model, top_n=5)
+    encoder_model = HuggingFaceCrossEncoder(model_name="BAAI/bge-reranker-base", model_kwargs={"device": "mps"})
+    compressor = CrossEncoderReranker(model=encoder_model, top_n=3)
     child_reranker = ContextualCompressionRetriever(
         base_compressor=compressor, 
         base_retriever=hybrid_retriever
@@ -144,7 +154,8 @@ def create_rag_chain(
         model=llm_model,
         temperature=0.0,
         base_url="http://127.0.0.1:11434",
-        num_ctx=8192
+        num_ctx=2048,
+        num_predict=400
     )
 
     def format_docs(docs):
