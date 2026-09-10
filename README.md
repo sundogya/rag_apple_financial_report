@@ -64,7 +64,7 @@ Evaluated against standard naive RAG pipelines on an Apple 10-K synthetic benchm
 * **Backend & API:** Python / FastAPI, Pydantic, Uvicorn
 * **Core RAG Framework:** LangChain / LlamaIndex
 * **Vector & Retrieval:** ChromaDB / Qdrant, BM25, Cohere/BGE Reranker
-* **LLM Orchestration:** OpenAI GPT-4o / Claude 3.5 Sonnet
+* **LLM Orchestration:** llama3.1:8b
 * **Evaluation:** Ragas Framework
 
 ---
